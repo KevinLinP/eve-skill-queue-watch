@@ -3,57 +3,43 @@
 </script>
 
 <script>
-	import Counter from '$lib/Counter.svelte';
+  import { handleIncomingRedirect, login, logout, fetch, getDefaultSession } from '@inrupt/solid-client-authn-browser'
+  import { getSolidDataset, saveSolidDatasetAt } from "@inrupt/solid-client";
+
+  async function loginClicked(event) {
+    await handleIncomingRedirect();
+
+    if (!getDefaultSession().info.isLoggedIn) {
+      await login({
+        oidcIssuer: "https://broker.pod.inrupt.com",
+        redirectUrl: window.location.href,
+        clientName: "Eve Skill Queue Watch"
+      });
+    }
+  }
+
+  async function logoutClicked(event) {
+    await logout()
+    console.log(2)
+  }
 </script>
 
 <svelte:head>
-	<title>Home</title>
+	<title>Eve Skill Queue Watch</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 </svelte:head>
 
 <section>
-	<h1>
-		<div class="welcome">
-			<picture>
-				<source srcset="svelte-welcome.webp" type="image/webp" />
-				<img src="svelte-welcome.png" alt="Welcome" />
-			</picture>
-		</div>
+  <div class="container">
+    <button on:click="{loginClicked}">
+      login 
+    </button>
 
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/index.svelte</strong>
-	</h2>
-
-	<Counter />
+    <button on:click="{logoutClicked}">
+      logout
+    </button>
+  </div>
 </section>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
 </style>

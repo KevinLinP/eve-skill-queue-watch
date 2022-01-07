@@ -16,28 +16,25 @@ import {
 import { getSolidDataset, saveSolidDatasetAt } from "@inrupt/solid-client";
 
 let loginStatus = null
+let userName = ''
 
-async function loginClicked(event) {
-  if (!getDefaultSession().info.isLoggedIn) {
-    await login({
-      oidcIssuer: "https://broker.pod.inrupt.com",
-      redirectUrl: window.location.href,
-      clientName: "Eve Skill Queue Watch"
-    });
-  } else {
-    alert('never supposed to get here')
-  }
+function loginClicked(event) {
+  login({
+    oidcIssuer: "https://broker.pod.inrupt.com",
+    redirectUrl: window.location.href,
+    clientName: "Eve Skill Queue Watch"
+  });
 }
 
-onLogin(() => {
-  loginStatus = true
-})
-onLogout(() => {
-  loginStatus = false
-})
-onSessionRestore(() => {
-  loginStatus = true
-})
+onLogin(() => sessionChanged())
+onLogout(() => sessionChanged())
+onSessionRestore(() => sessionChanged())
+function sessionChanged() {
+  const session = getDefaultSession()
+  loginStatus = session.info.isLoggedIn
+  userName = session.info.webId
+  console.log(3, session)
+}
 
 if (typeof window !== 'undefined') {
   handleIncomingRedirect({restorePreviousSession: true});
@@ -45,7 +42,7 @@ if (typeof window !== 'undefined') {
 
 async function logoutClicked(event) {
   await logout()
-  console.log(2)
+  //console.log(2)
 }
 </script>
 
@@ -56,15 +53,18 @@ async function logoutClicked(event) {
 
 <section>
   <div class="container">
-    {#if loginStatus === true}
-      <button on:click="{logoutClicked}">
-        logout
-      </button>
-    {/if}
     {#if loginStatus === false}
       <button on:click="{loginClicked}">
         login
       </button>
+    {/if}
+    {#if loginStatus === true}
+      <button on:click="{logoutClicked}">
+        logout
+      </button>
+      <p>
+        { userName }
+      </p>
     {/if}
   </div>
 </section>

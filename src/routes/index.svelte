@@ -73,35 +73,26 @@ function logoutClicked(event) {
 </script>
 
 <svelte:head>
-  <title>Eve Skill Queue Watch</title>
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
-
   <script>
+    // readable-stream/n3/solid-client doesn't work without this hack for some reason
     var global = global || window;
   </script>
 </svelte:head>
 
-<section>
-  <div class="container">
-      <button on:click="{loginClicked}">
-        login
-      </button>
-    {#if loginStatus === false}
-    {/if}
-    {#if loginStatus === true}
-      <button on:click="{logoutClicked}">
-        logout
-      </button>
-      <p>
-        { userName }
-      </p>
+{#if !loginStatus}
+  <button on:click="{loginClicked}">
+    login
+  </button>
+{/if}
+{#if loginStatus === true}
+  <button on:click="{logoutClicked}">
+    logout
+  </button>
+  <p>
+    { userName }
+  </p>
 
-      <button on:click="{fetchData}">
-        fetchData
-      </button>
-    {/if}
-  </div>
-</section>
-
-<style>
-</style>
+  <button on:click="{fetchData}">
+    fetchData
+  </button>
+{/if}

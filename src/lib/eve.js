@@ -1,12 +1,12 @@
 function base64ToBase64url(base64) {
   return base64.replaceAll(/[+\/=]/g, (c) => {
-    const map = {
+    const characterMap = {
       '+': '-',
       '/': '_',
       '=': '',
     }
 
-    return map[c]
+    return characterMap[c]
   })
 }
 
@@ -18,12 +18,21 @@ function generateCodeVerifier() {
   return base64ToBase64url(base64)
 }
 
+async function generateCodeChallenge(codeVerifier) {
+  const codeVerifierBuffer = new TextEncoder().encode(codeVerifier);
+  const codeChallengeBuffer = await window.crypto.subtle.digest('SHA-256', codeVerifierBuffer)
+  const codeChallengeBytes = new Uint8Array(codeChallengeBuffer)
+  var base64 = btoa(String.fromCharCode.apply(null, codeChallengeBytes))
+
+  return base64ToBase64url(base64)
+}
+
 export async function authorize() {
+  // https://datatracker.ietf.org/doc/html/rfc7636
   let codeVerifier = generateCodeVerifier()
   window.sessionStorage.setItem('codeVerifier', codeVerifier)
-  // let codeChallenge = await computeChallenge(codeVerifier)
-
-  console.log({codeVerifier})
+  let codeChallenge = await generateCodeChallenge(codeVerifier)
+  console.log({codeVerifier, codeChallenge})
 
   const queryParams = {
     response_type: 'code',

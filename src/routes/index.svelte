@@ -13,10 +13,15 @@ import {
   onLogout,
   onSessionRestore,
 } from '@inrupt/solid-client-authn-browser'
-import { getSolidDataset, saveSolidDatasetAt } from "@inrupt/solid-client";
+import {
+  getSolidDataset,
+  createSolidDataset,
+  saveSolidDatasetAt
+} from "@inrupt/solid-client";
 
 let loginStatus = null
 let userName = ''
+let session = null
 
 function loginClicked(event) {
   login({
@@ -26,11 +31,33 @@ function loginClicked(event) {
   });
 }
 
+async function fetchData() {
+  let dataset
+  const datasetUrl = 'https://pod.inrupt.com/kevinlinp/settings/eve-skill-queue-watch'
+
+  try {
+    dataset = await getSolidDataset(datasetUrl, {fetch})
+    console.log('found dataset', dataset)
+  } catch (error) {
+    if (!e.message.match(/404/)) {
+      throw e
+    }
+  }
+
+  console.log(5, {dataset})
+
+  if (!dataset) {
+    const tempDataset = createSolidDataset()
+    dataset = await saveSolidDatasetAt(datasetUrl, tempDataset, {fetch})
+    console.log('created new dataset', dataset)
+  }
+}
+
 onLogin(() => sessionChanged())
 onLogout(() => sessionChanged())
 onSessionRestore(() => sessionChanged())
 function sessionChanged() {
-  const session = getDefaultSession()
+  session = getDefaultSession()
   loginStatus = session.info.isLoggedIn
   userName = session.info.webId
   console.log(3, session)
@@ -40,9 +67,8 @@ if (typeof window !== 'undefined') {
   handleIncomingRedirect({restorePreviousSession: true});
 }
 
-async function logoutClicked(event) {
-  await logout()
-  //console.log(2)
+function logoutClicked(event) {
+  logout()
 }
 </script>
 
@@ -53,10 +79,10 @@ async function logoutClicked(event) {
 
 <section>
   <div class="container">
-    {#if loginStatus === false}
       <button on:click="{loginClicked}">
         login
       </button>
+    {#if loginStatus === false}
     {/if}
     {#if loginStatus === true}
       <button on:click="{logoutClicked}">
@@ -65,6 +91,10 @@ async function logoutClicked(event) {
       <p>
         { userName }
       </p>
+
+      <button on:click="{fetchData}">
+        fetchData
+      </button>
     {/if}
   </div>
 </section>

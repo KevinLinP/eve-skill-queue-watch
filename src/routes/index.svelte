@@ -75,6 +75,10 @@ function logoutClicked(event) {
 <svelte:head>
   <title>Eve Skill Queue Watch</title>
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+  <script>
+    var global = global || window;
+  </script>
 </svelte:head>
 
 <section>
